@@ -1,0 +1,49 @@
+name: VERSION-CHECK
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  
+  version-check:
+
+    runs-on: ubuntu-20.04
+    name: version-check
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python Environment
+        if: steps.changed-files.outputs.all_changed_files
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - name: 변경된 파일 체크
+        id: changed-files
+        uses: tj-actions/changed-files@v18.7
+        with:
+          files_ignore: |
+            *.github/*
+        
+      - name: Check .version 변경된 라인 체크
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            save_path="$(basename -a $file).diff"
+            git diff ${{ github.event.pull_request.base.sha }} $file > $save_path
+            echo $save_path
+          done
+      
+      - name: Install requirements
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt --extra-index-url ${{ secrets.EXTRA_INDEX_URL }} --trusted-host ${{ secrets.TRUSTED_HOST }}
+
+      - name: Version 파일이 변경되었는 지 체크
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          ./version-check --version --modified-files ${{ steps.changed-files.outputs.all_changed_files }}
