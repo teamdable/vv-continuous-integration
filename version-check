@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+from typing import List
+
+from slackboy import SlackBoy
+
+class VersionTarget:
+    def __init__(self, version_file:str):
+        self.prev_version = None
+        self.next_version = None
+        self.version_file = version_file
+    
+    def get_version_string(self):
+        if self.version_file == '.version.diff':
+            return '__version__'
+        elif self.version_file == '_version.py.diff':
+            return '__version__'
+        elif self.version_file == 'package.json.diff':
+            return 'version'
+        else:
+            return 'unknown'
+
+    def check_version_modified(self):
+        with open(self.version_file, 'r', encoding='utf-8') as f:
+            for line in f.readlines():
+                version_string = self.get_version_string()
+                if line.startswith("-" + version_string):
+                    self.prev_version = line.split('=')[1].replace('"', '').replace("'","").strip()
+                if line.startswith("+" + version_string):
+                    self.next_version = line.split('=')[1].replace('"', '').replace("'","").strip()
+        
+        if self.prev_version != self.next_version:
+            return True
+        else:
+            return False
+
+
+def check_version_update(client: SlackBoy, modified_files:List[str]):
+    version_file_set = {'_version.py', '.version', 'package.json'}
+    for file_path in modified_files:
+        file_name = os.path.basename(file_path)
+        diff_path = file_name + '.diff'
+        if file_name in version_file_set:
+            version_target = VersionTarget(diff_path)
+            if version_target.check_version_modified():
+                print(f'version update: {version_target.prev_version} -> {version_target.next_version}')
+                sys.exit(0)
+            else:
+                msg = f'version not updated: {version_target.prev_version} == {version_target.next_version}'
+                print(msg)
+                
+                client.send_message()
+                sys.exit(1)
+    sys.exit(1)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--version-files', type=str, default=[], nargs='+', help='modified files')
+    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+
+    args = parser.parse_args()
+
+    client = SlackBoy.from_token(args.token)
+    client.add_default_channel(args.channel)
+
+    check_version_update(client, args.modified_files)
