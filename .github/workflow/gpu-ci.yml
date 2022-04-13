@@ -36,6 +36,12 @@ jobs:
             git diff ${{ github.event.pull_request.base.sha }} $file > $save_path
             echo $save_path
           done
+      
+      - name: Install requirements
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt --extra-index-url ${{ secrets.EXTRA_INDEX_URL }} --trusted-host ${{ secrets.TRUSTED_HOST }}
 
       - name: Version 파일이 변경되었는 지 체크
         if: steps.changed-files.outputs.all_changed_files
