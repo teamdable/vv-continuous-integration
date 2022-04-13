@@ -46,4 +46,4 @@ jobs:
       - name: Version 파일이 변경되었는 지 체크
         if: steps.changed-files.outputs.all_changed_files
         run: |
-          ./version-check --version --modified-files ${{ steps.changed-files.outputs.all_changed_files }}
+          ./version-check --version-files .version --token ${{ secrets.SLACK_TOKEN }} --channel dev-vv-test-log
