@@ -66,6 +66,6 @@ if __name__ == '__main__':
 
     client = SlackBoy.from_token(args.token)
     client.add_default_channel(args.channel)
-    client.send_message('test22')
+    client.send_message('test3')
 
     # check_version_update(client, args.modified_files)
