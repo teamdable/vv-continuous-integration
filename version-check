@@ -14,7 +14,7 @@ def check_version(client: SlackReporter, version_file:str) -> int:
     version_update = False
     
     if not version_target.check_version_modified():
-        msg = f'{version_file} 파일에서 Version이 변경되지 않았습니다.'
+        msg = f'{version_file} 파일이 수정되지 않았습니다.'
     
     elif not version_target.check_version_update():
         msg = f'version not update: {version_target.prev_version} == {version_target.next_version}'
