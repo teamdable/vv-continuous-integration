@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+import argparse
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modified-fiels', type=str, default=[], nargs='+', help='modified files')
+    parser.add_argument('--token', type=str, default='', help='slack token')
+    parser.add_argument('--channel', type=str, default='', help='slack channel')
+    parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    parser.add_argument('--target-name', type=str, default='', help='target branch name')
+    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+
+    args = parser.parse_args()
