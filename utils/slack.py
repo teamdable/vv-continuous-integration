@@ -21,7 +21,7 @@ class SlackReporter:
             f'*Repository: {self.repository}* \n\n'
             '*Pull-request info:*\n'
             f'- branch: {self.branch} -> {self.target}\n'
-            f'- url: {self.get_pull_request_url}\n\n'
+            f'- url: {self.get_pull_request_url()}\n\n'
             f'```{msg}```\n'
             f'tag: {self.tag}_WARNING'
         )
