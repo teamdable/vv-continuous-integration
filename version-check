@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+
+from utils.slack import SlackReporter
+from utils.version import VersionTarget
+
+def check_version(client: SlackReporter, version_file:str) -> int:
+    diff_file = version_file + '.diff'
+    version_target = VersionTarget(diff_file)
+    
+    version_update = False
+    
+    if not version_target.check_version_modified():
+        msg = f'{version_file} 파일에서 Version이 변경되지 않았습니다.'
+    
+    elif not version_target.check_version_update():
+        msg = f'version not update: {version_target.prev_version} -> {version_target.next_version}'
+        
+    else:
+        msg = f'version update: {version_target.prev_version} == {version_target.next_version}'
+        version_update = True
+    
+    if version_update is False:
+        client.send_slack_message(msg)
+
+    print(msg)
+    return 0 if version_update else 1
+    
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--version-file', type=str, help='modified files')
+    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+    parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    parser.add_argument('--target-name', type=str, default='', help='target branch name')
+    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+
+    args = parser.parse_args()
+
+    client = SlackReporter(
+        token=args.token,
+        channel=args.channel,
+        prefix='ci-version-check',
+        repository=args.repo_name,
+        branch=args.branch_name,
+        target=args.target_name,
+        pr_number=args.pull_request_number,
+        tag='CI_VERSION_CHECK'
+    )
+
+    if os.path.exists(args.version_file + '.diff'):
+        sys.exit(check_version(client, args.version_file))
+    else:
+        msg = f'Branch에서 {args.version_file} 파일을 업데이트 하지 않았거나 파일을 찾을 수 없습니다.'
+        client.send_slack_message(msg)
+        sys.exit(1)
