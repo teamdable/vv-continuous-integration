@@ -31,7 +31,7 @@ def check_version(client: SlackReporter, version_file:str) -> int:
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--version-file', type=str, help='modified files')
+    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
     parser.add_argument('-t', '--token', type=str, default='', help='slack token')
     parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
     parser.add_argument('--repo-name', type=str, default='', help='repository name')
@@ -52,7 +52,10 @@ if __name__ == '__main__':
         tag='CI_VERSION_CHECK'
     )
 
-    if os.path.exists(args.version_file + '.diff'):
+    for file in args.modified_files:
+        if os.path.bashname(file) in {'_version', '_version.py', 'package.json'}:
+            check_version(client, file)
+
         sys.exit(check_version(client, args.version_file))
     else:
         msg = f'Branch에서 {args.version_file} 파일을 업데이트 하지 않았거나 파일을 찾을 수 없습니다.'
