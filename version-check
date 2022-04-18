@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+from argparse import Namespace
+
+from utils.slack import SlackReporter
+from utils.version import VersionTarget
+
+def check_version(client: SlackReporter, version_file: str, sha: str) -> bool:
+    diff_file = version_file + '.diff'
+    os.system(f'git diff {sha} {version_file} > {diff_file}')
+
+    version_target = VersionTarget(diff_file)
+    version_update = False
+    
+    if not version_target.check_version_modified():
+        msg = f'{version_file} 파일이 수정되지 않았습니다.'
+    
+    elif not version_target.check_version_update():
+        msg = f'version not update: {version_target.prev_version} == {version_target.next_version}'
+        
+    else:
+        msg = f'version update: {version_target.prev_version} -> {version_target.next_version}'
+        version_update = True
+    
+    if version_update is False:
+        client.send_slack_message(msg)
+
+    print(msg)
+    return version_update
+
+def main(args: Namespace):
+    client = SlackReporter(
+        token=args.token,
+        channel=args.channel,
+        prefix='ci-version-check',
+        repository=args.repo_name,
+        branch=args.branch_name,
+        target=args.base_name,
+        pr_number=args.pull_request_number,
+        tag='CI_VERSION_CHECK'
+    )
+
+    version_update = False
+    for file in args.modified_files:
+        if os.path.bashname(file) in {'_version', '_version.py', 'package.json'}:
+            version_update = check_version(client, file, args.base_sha)
+            break
+
+    else:
+        msg = f'Version 파일을 업데이트 하지 않았습니다.'
+        client.send_slack_message(msg)
+        sys.exit(1)
+    
+    if version_update is False:
+        sys.exit(1)
+
+    
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
+    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+    parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    parser.add_argument('--base-name', type=str, default='', help='base branch name')
+    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+
+    args = parser.parse_args()
+    main(args)

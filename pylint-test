@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+from argparse import Namespace
+
+from utils.slack import SlackReporter
+from utils.linter import is_python_file, get_pylint_score
+
+def check_pylinter(client: SlackReporter, modified_files: list, min_score: int) -> bool:
+    is_pass = True
+    for file in modified_files:
+        if is_python_file(file):
+            score, output = get_pylint_score(file)
+            if score < min_score:
+                msg = f'test target: {file}\npylint score: {score}/10\n점수가 {min_score}보다 작습니다.\n\n{output}'
+                client.send_slack_message(msg)
+                is_pass = False
+                print(msg)
+    return is_pass
+
+def main(args: Namespace):
+    client = SlackReporter(
+        token=args.token,
+        channel=args.channel,
+        prefix='ci-version-check',
+        repository=args.repo_name,
+        branch=args.branch_name,
+        target=args.base_name,
+        pr_number=args.pull_request_number,
+        tag='CI_VERSION_CHECK'
+    )
+    
+    pylint_pass = check_pylinter(client, args.modified_files, 80)
+
+    if pylint_pass is False:
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
+    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+    parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    parser.add_argument('--base-name', type=str, default='', help='base branch name')
+    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+
+    args = parser.parse_args()
+    main(args)
