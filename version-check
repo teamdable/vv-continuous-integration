@@ -19,10 +19,10 @@ def check_version(client: SlackReporter, version_file: str, sha: str) -> bool:
         msg = f'{version_file} 파일이 수정되지 않았습니다.'
     
     elif not version_target.check_version_update():
-        msg = f'version not update: {version_target.prev_version} == {version_target.next_version}'
+        msg = f'정상적이지 않은 Version update:\n{version_target.prev_version} -> {version_target.next_version}'
         
     else:
-        msg = f'version update: {version_target.prev_version} -> {version_target.next_version}'
+        msg = f'Version update success:\n{version_target.prev_version} -> {version_target.next_version}'
         version_update = True
     
     if version_update is False:
@@ -45,7 +45,7 @@ def main(args: Namespace):
 
     version_update = False
     for file in args.modified_files:
-        if os.path.basename(file) in {'_version', '_version.py', 'package.json'}:
+        if os.path.basename(file) in {'.version', '_version.py', 'package.json'}:
             version_update = check_version(client, file, args.base_sha)
             break
 

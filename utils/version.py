@@ -30,17 +30,17 @@ class VersionTarget:
 
     def check_version_update(self):
         if 'a' in self.prev_version and 'a' in self.next_version:
-            if int(self.prev_version.split('a')[1]) < int(self.next_version.split('a')[1]):
+            if int(self.prev_version.split('a')[1]) + 1 == int(self.next_version.split('a')[1]):
                 return True
             else:
                 return False
         elif 'b' in self.prev_version and 'b' in self.next_version:
-            if int(self.prev_version.split('b')[1]) < int(self.next_version.split('b')[1]):
+            if int(self.prev_version.split('b')[1]) + 1 == int(self.next_version.split('b')[1]):
                 return True
             else:
                 return False
         elif 'rc' in self.prev_version and 'rc' in self.next_version:
-            if int(self.prev_version.split('rc')[1]) < int(self.next_version.split('rc')[1]):
+            if int(self.prev_version.split('rc')[1]) + 1 == int(self.next_version.split('rc')[1]):
                 return True
             else:
                 return False
