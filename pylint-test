@@ -32,16 +32,15 @@ def main(args: Namespace):
         pr_number=args.pull_request_number,
         tag='CI_VERSION_CHECK'
     )
-
-    modified_files = subprocess.check_output(['git', 'diff', '--name-only', args.base_sha, 'HEAD']).decode().split('\n')
     
-    if check_pylinter(client, modified_files, args.min_score) is False:
-        sys.exit(1)
-    else:
+    if check_pylinter(client, args.modified_files, args.min_score) is True:
         sys.exit(0)
+    else:
+        sys.exit(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
     parser.add_argument('-t', '--token', type=str, default='', help='slack token')
     parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
     parser.add_argument('-m', '--min-score', type=float, default=8.0, help='min score')

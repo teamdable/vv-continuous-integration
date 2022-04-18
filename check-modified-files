@@ -3,9 +3,7 @@
 import argparse
 import subprocess
 
-def main(base_sha: str):
-    modified_files = subprocess.check_output(['git', 'diff', '--name-only', base_sha, 'HEAD']).decode().split('\n')
-
+def main(modified_files: list):
     any_python_files = False
     any_js_files = False
 
@@ -28,7 +26,7 @@ def main(base_sha: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
 
     args = parser.parse_args()
-    main(args.base_sha)
+    main(args.modified_files)
