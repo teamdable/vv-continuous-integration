@@ -2,6 +2,7 @@
 
 import sys
 import argparse
+import subprocess
 from argparse import Namespace
 
 from utils.slack import SlackReporter
@@ -17,6 +18,7 @@ def check_pylinter(client: SlackReporter, modified_files: list, min_score: float
                 client.send_slack_message(msg)
                 is_pass = False
                 print(msg)
+        
     return is_pass
 
 def main(args: Namespace):
@@ -30,15 +32,16 @@ def main(args: Namespace):
         pr_number=args.pull_request_number,
         tag='CI_VERSION_CHECK'
     )
+
+    modified_files = subprocess.check_output(['git', 'diff', '--name-only', args.base_sha, 'HEAD']).decode().split('\n')
     
-    if check_pylinter(client, args.modified_files, args.min_score) is False:
+    if check_pylinter(client, modified_files, args.min_score) is False:
         sys.exit(1)
     else:
         sys.exit(0)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
     parser.add_argument('-t', '--token', type=str, default='', help='slack token')
     parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
     parser.add_argument('-m', '--min-score', type=float, default=8.0, help='min score')
