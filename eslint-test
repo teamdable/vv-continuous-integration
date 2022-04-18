@@ -25,25 +25,17 @@ def main(args: Namespace):
     is_installed = False
     for file in args.modified_files:
         if is_node_file(file):
-            os.system(f'npm install')
+            os.system(f'NODE_ENV=development npm install')
             is_installed = True
             break
     
-    is_pass = True
     if is_installed:
-        test_result = subprocess.check_output(['npm', 'run', 'test'], shell=True).decode().split('\n')
-        for line in test_result:
-            if 'error' in line:
-                is_pass = False
-                break
-        
-    if not is_pass:
-        client.send_slack_message(test_result)
-        sys.exit(1)
-    else:
-        sys.exit(0)
-    
-                
+        output = subprocess.run(['npm', 'run', 'test'], capture_output=True)
+        if output.returncode != 0:
+            client.send_slack_message(output.stdout.decode())
+            sys.exit(1)
+        else:
+            sys.exit(0)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -23,7 +23,7 @@ on:
 
 
 jobs:
-  version-check:
+  continuous-integration:
     runs-on: ubuntu-20.04
     name: version check and linter
 

@@ -4,24 +4,20 @@ class VersionTarget:
         self.next_version = None
         self.diff_file = diff_file
     
-    def get_split_mark(self):
-        if self.diff_file == '.version.diff':
-            return '='
-        elif self.diff_file == '_version.py.diff':
-            return '='
-        elif self.diff_file == 'package.json.diff':
-            return ':'
-        else:
-            return '=='
+    def get_version(self, line: str):
+        if '=' in line:
+            return line.split('=')[1].replace('"', '').replace("'","").strip()
+        if ':' in line:
+            return line.split(':')[1].replace('"', '').replace("'","").strip()
 
     def check_version_modified(self):
         with open(self.diff_file, 'r', encoding='utf-8') as f:
             for line in f.readlines():
-                split_target = self.get_split_mark()
-                if line.startswith("-") and "version" in line:
-                    self.prev_version = line.split(split_target)[1].replace('"', '').replace("'","").strip()
-                if line.startswith("+") and "version" in line:
-                    self.next_version = line.split(split_target)[1].replace('"', '').replace("'","").strip()
+                if 'version' in line:
+                    if line.startswith('+'):
+                        self.next_version = self.get_version(line)
+                    elif line.startswith('-'):
+                        self.prev_version = self.get_version(line)
         
         if self.prev_version is None or self.next_version is None:
             return False
