@@ -74,3 +74,12 @@ jobs:
             --base-name ${{ github.event.pull_request.base.ref }} \
             --base-sha ${{ github.event.pull_request.base.sha }} \
             --pull-request-number ${{ github.event.number }}
+      
+      - name: Eslint Test
+        if: steps.check-modified-files.any-js-files
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+        run: |
+          npm install
+          npm run test

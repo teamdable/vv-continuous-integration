@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+
+def main(base_sha: str):
+    modified_files = subprocess.check_output(['git', 'diff', '--name-only', base_sha, 'HEAD']).decode().split('\n')
+
+    any_python_files = False
+    any_js_files = False
+
+    for file in modified_files:
+        if file.endswith('.py'):
+            any_python_files = True
+        
+        if file.endswith('.js') or file.endswith('.ts') or file.endswith('.tsx') or file.endswith('.jsx'):
+            any_js_files = True
+    
+    if any_python_files:
+        subprocess.check_call('echo "::set-output name=any-python-files::true"', shell=True)
+    else:
+        subprocess.check_call('echo "::set-output name=any-python-files::false"', shell=True)
+    
+    if any_js_files:
+        subprocess.check_call('echo "::set-output name=any-js-files::true"', shell=True)
+    else:
+        subprocess.check_call('echo "::set-output name=any-js-files::false"', shell=True)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+
+    args = parser.parse_args()
+    main(args.base_sha)
