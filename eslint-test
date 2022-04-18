@@ -3,6 +3,7 @@
 import os
 import sys
 import argparse
+import subprocess
 from argparse import Namespace
 
 from utils.linter import is_node_file
@@ -29,18 +30,12 @@ def main(args: Namespace):
             break
     
     if is_installed:
-        return_code = os.system('npm run test')
-    else:
-        return_code = 1
-    
-    if return_code != 0:
-        msg = f'eslint test 실패'
-        client.send_slack_message(msg)
-        sys.exit(1)
-    else:
-        sys.exit(0)
-    
-                
+        output = subprocess.run(['npm', 'run', 'test'], capture_output=True)
+        if output.returncode != 0:
+            client.send_slack_message(output.stdout.decode())
+            sys.exit(1)
+        else:
+            sys.exit(0)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
