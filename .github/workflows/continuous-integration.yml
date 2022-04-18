@@ -46,10 +46,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
-      
-      - name: Check install files
-        id: check-modified-files
-        run: ./action/check-modified-files --base-sha ${{ github.event.pull_request.base.sha }}
 
       - name: Version 파일이 변경되었는 지 체크
         run: |
