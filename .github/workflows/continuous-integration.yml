@@ -81,5 +81,5 @@ jobs:
       - name: Eslint test
         if: steps.changed-files.outputs.all_changed_files
         run: |
-          npm install
+          sudo npm install
           npm run test
