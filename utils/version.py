@@ -17,7 +17,7 @@ class VersionTarget:
     def check_version_modified(self):
         with open(self.diff_file, 'r', encoding='utf-8') as f:
             for line in f.readlines():
-                split_target = self.get_version_string()
+                split_target = self.get_split_mark()
                 if line.startswith("-") and "version" in line:
                     self.prev_version = line.split(split_target)[1].replace('"', '').replace("'","").strip()
                 if line.startswith("+") and "version" in line:
