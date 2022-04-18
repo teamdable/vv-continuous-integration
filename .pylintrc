@@ -84,13 +84,17 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=too-many-arguments,
+        too-many-instance-attributes,
         missing-class-docstring,
         missing-module-docstring,
         missing-function-docstring,
         unspecified-encoding,
         invalid-name,
         bare-except,
+        broad-except,
         import-error,
+        trailing-whitespace,
+        no-name-in-module,
         redefined-outer-name
 
 # Enable the message, report, category or checker with the given id(s). You can
