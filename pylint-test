@@ -20,18 +20,20 @@ def check_pylinter(client: SlackReporter, modified_files: list, min_score: int) 
     return is_pass
 
 def main(args: Namespace):
-    client = SlackReporter(
-        token=args.token,
-        channel=args.channel,
-        prefix='ci-version-check',
-        repository=args.repo_name,
-        branch=args.branch_name,
-        target=args.base_name,
-        pr_number=args.pull_request_number,
-        tag='CI_VERSION_CHECK'
-    )
+    # client = SlackReporter(
+    #     token=args.token,
+    #     channel=args.channel,
+    #     prefix='ci-version-check',
+    #     repository=args.repo_name,
+    #     branch=args.branch_name,
+    #     target=args.base_name,
+    #     pr_number=args.pull_request_number,
+    #     tag='CI_VERSION_CHECK'
+    # )
     
-    pylint_pass = check_pylinter(client, args.modified_files, 80)
+    
+
+    pylint_pass = check_pylinter(None, args.modified_files, 8)
 
     if pylint_pass is False:
         sys.exit(1)
@@ -41,13 +43,15 @@ def main(args: Namespace):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
-    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
-    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
-    parser.add_argument('--repo-name', type=str, default='', help='repository name')
-    parser.add_argument('--branch-name', type=str, default='', help='branch name')
-    parser.add_argument('--base-name', type=str, default='', help='base branch name')
-    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
-    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+    # parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    # parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+    # parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    # parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    # parser.add_argument('--base-name', type=str, default='', help='base branch name')
+    # parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+    # parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
 
     args = parser.parse_args()
+
+    args.modified_files = ['bin/usbcli']
     main(args)
