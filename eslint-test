@@ -41,6 +41,7 @@ def main(args: Namespace):
         client.send_slack_message(test_result)
         sys.exit(1)
     else:
+        client.send_slack_message(test_result)
         sys.exit(0)
     
                 
