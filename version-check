@@ -45,7 +45,7 @@ def main(args: Namespace):
 
     version_update = False
     for file in args.modified_files:
-        if os.path.bashname(file) in {'_version', '_version.py', 'package.json'}:
+        if os.path.basename(file) in {'_version', '_version.py', 'package.json'}:
             version_update = check_version(client, file, args.base_sha)
             break
 
