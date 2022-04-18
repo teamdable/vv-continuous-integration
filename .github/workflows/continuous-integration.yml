@@ -8,12 +8,6 @@ on:
         required: true
         type: string
 
-      version-file:
-        description: version file name
-        required: true
-        type: string
-
-
     secrets:
       extra-index-url:
         description: pipy extra index url
