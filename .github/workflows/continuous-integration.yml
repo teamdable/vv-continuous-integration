@@ -72,6 +72,7 @@ jobs:
         run: |
           ./action/pylint-test \
             --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
+            --min-score 8.0 \
             --token ${{ secrets.slack-token }} \
             --channel ${{ inputs.slack-channel }} \
             --repo-name ${{ github.event.repository.name }} \
