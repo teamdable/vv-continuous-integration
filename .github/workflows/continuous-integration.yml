@@ -53,7 +53,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
-          apt install eslint
 
       - name: Version 파일이 변경되었는 지 체크
         if: steps.changed-files.outputs.all_changed_files
