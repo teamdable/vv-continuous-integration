@@ -1,35 +1,23 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import argparse
 from argparse import Namespace
 
 from utils.slack import SlackReporter
-from utils.version import VersionTarget
+from utils.linter import is_python_file, get_pylint_score
 
-def check_version(client: SlackReporter, version_file: str, sha: str) -> bool:
-    diff_file = version_file + '.diff'
-    os.system(f'git diff {sha} {version_file} > {diff_file}')
-
-    version_target = VersionTarget(diff_file)
-    version_update = False
-    
-    if not version_target.check_version_modified():
-        msg = f'{version_file} 파일이 수정되지 않았습니다.'
-    
-    elif not version_target.check_version_update():
-        msg = f'version not update: {version_target.prev_version} == {version_target.next_version}'
-        
-    else:
-        msg = f'version update: {version_target.prev_version} -> {version_target.next_version}'
-        version_update = True
-    
-    if version_update is False:
-        client.send_slack_message(msg)
-
-    print(msg)
-    return version_update
+def check_pylinter(client: SlackReporter, modified_files: list, min_score: int) -> bool:
+    is_pass = True
+    for file in modified_files:
+        if is_python_file(file):
+            score, output = get_pylint_score(file)
+            if score < min_score:
+                msg = f'test target: {file}\npylint score: {score}/10\n점수가 {min_score}보다 작습니다.\n\n{output}'
+                client.send_slack_message(msg)
+                is_pass = False
+                print(msg)
+    return is_pass
 
 def main(args: Namespace):
     client = SlackReporter(
@@ -42,22 +30,14 @@ def main(args: Namespace):
         pr_number=args.pull_request_number,
         tag='CI_VERSION_CHECK'
     )
+    
+    pylint_pass = check_pylinter(client, args.modified_files, 80)
 
-    version_update = False
-    for file in args.modified_files:
-        if os.path.bashname(file) in {'_version', '_version.py', 'package.json'}:
-            version_update = check_version(client, file, args.base_sha)
-            break
-
+    if pylint_pass is False:
+        sys.exit(1)
     else:
-        msg = f'Version 파일을 업데이트 하지 않았습니다.'
-        client.send_slack_message(msg)
-        sys.exit(1)
-    
-    if version_update is False:
-        sys.exit(1)
+        sys.exit(0)
 
-    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')

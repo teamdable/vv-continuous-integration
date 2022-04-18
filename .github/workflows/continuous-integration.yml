@@ -8,12 +8,6 @@ on:
         required: true
         type: string
 
-      version-file:
-        description: version file name
-        required: true
-        type: string
-
-
     secrets:
       extra-index-url:
         description: pipy extra index url
@@ -34,7 +28,7 @@ jobs:
     name: version check and linter
 
     steps:
-      - name: Checkout the deploy-target repository
+      - name: Checkout the CI-target repository
         uses: actions/checkout@v3
 
       - name: Checkout the action repository
@@ -42,6 +36,7 @@ jobs:
         with:
           repository: teamdable/vv-continuous-integration
           path: action/
+
       
       - name: 변경된 파일 체크
         id: changed-files
@@ -53,26 +48,34 @@ jobs:
         with:
           python-version: 3.8
       
-      - name: Install python packages
+      - name: Install packages
         if: steps.changed-files.outputs.all_changed_files
         run: |
           python -m pip install --upgrade pip
           pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
-      
-      - name: Check .version 변경된 라인 체크
-        if: steps.changed-files.outputs.all_changed_files
-        run: |
-          save_path="$(basename -a ${{ inputs.version-file }} ).diff"
-          git diff ${{ github.event.pull_request.base.sha }} ${{ inputs.version-file }} > $save_path
 
       - name: Version 파일이 변경되었는 지 체크
         if: steps.changed-files.outputs.all_changed_files
         run: |
           ./action/version-check \
-            --version-file ${{ inputs.version-file }} \
+            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
             --token ${{ secrets.slack-token }} \
             --channel ${{ inputs.slack-channel }} \
             --repo-name ${{ github.event.repository.name }} \
             --branch-name ${{ github.event.pull_request.head.ref }} \
-            --target-name ${{ github.event.pull_request.base.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
+      
+      - name: Pylint Test
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          ./action/pylint-test \
+            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
             --pull-request-number ${{ github.event.number }}
