@@ -6,22 +6,22 @@ class VersionTarget:
     
     def get_version_string(self):
         if self.diff_file == '.version.diff':
-            return '__version__'
+            return ('__version__', '=')
         elif self.diff_file == '_version.py.diff':
-            return '__version__'
+            return ('__version__', '=')
         elif self.diff_file == 'package.json.diff':
-            return 'version'
+            return ('version', ':')
         else:
-            return 'unknown'
+            return ('unknown', '==')
 
     def check_version_modified(self):
         with open(self.diff_file, 'r', encoding='utf-8') as f:
             for line in f.readlines():
-                version_string = self.get_version_string()
+                version_string, split_target = self.get_version_string()
                 if line.startswith("-" + version_string):
-                    self.prev_version = line.split('=')[1].replace('"', '').replace("'","").strip()
+                    self.prev_version = line.split(split_target)[1].replace('"', '').replace("'","").strip()
                 if line.startswith("+" + version_string):
-                    self.next_version = line.split('=')[1].replace('"', '').replace("'","").strip()
+                    self.next_version = line.split(split_target)[1].replace('"', '').replace("'","").strip()
         
         if self.prev_version is None or self.next_version is None:
             return False

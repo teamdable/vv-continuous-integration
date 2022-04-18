@@ -31,9 +31,7 @@ def main(args: Namespace):
         tag='CI_VERSION_CHECK'
     )
     
-    pylint_pass = check_pylinter(client, args.modified_files, args.min_score)
-
-    if pylint_pass is False:
+    if check_pylinter(client, args.modified_files, args.min_score) is False:
         sys.exit(1)
     else:
         sys.exit(0)
