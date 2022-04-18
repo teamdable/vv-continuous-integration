@@ -25,7 +25,7 @@ def main(args: Namespace):
     is_installed = False
     for file in args.modified_files:
         if is_node_file(file):
-            os.system(f'npm install')
+            os.system(f'sudo npm install')
             is_installed = True
             break
     

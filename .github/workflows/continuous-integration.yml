@@ -23,7 +23,7 @@ on:
 
 
 jobs:
-  version-check:
+  continuous-integration:
     runs-on: ubuntu-20.04
     name: version check and linter
 
@@ -81,5 +81,13 @@ jobs:
       - name: Eslint test
         if: steps.changed-files.outputs.all_changed_files
         run: |
-          sudo npm install
-          npm run test
+          ./action/eslint-test \
+            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
+            --min-score 8.0 \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
