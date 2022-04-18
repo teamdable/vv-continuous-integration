@@ -64,7 +64,20 @@ jobs:
       - name: Version 파일이 변경되었는 지 체크
         if: steps.changed-files.outputs.all_changed_files
         run: |
-          ./action/version-linter-check \
+          ./action/version-check \
+            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
+      
+      - name: Pylint Test
+        if: steps.changed-files.outputs.all_changed_files
+        run: |
+          ./action/pylint-test \
             --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
             --token ${{ secrets.slack-token }} \
             --channel ${{ inputs.slack-channel }} \
