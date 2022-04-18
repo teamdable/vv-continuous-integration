@@ -1,41 +1,49 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import argparse
+import subprocess
 from argparse import Namespace
 
+from utils.linter import is_node_file
 from utils.slack import SlackReporter
-from utils.linter import is_python_file, get_pylint_score
 
-def check_pylinter(client: SlackReporter, modified_files: list, min_score: float) -> bool:
-    is_pass = True
-    for file in modified_files:
-        if is_python_file(file):
-            score, output = get_pylint_score(file)
-            if score < min_score:
-                msg = f'test target: {file}\npylint score: {score}/10\n점수가 {min_score}보다 작습니다.\n\n{output}'
-                client.send_slack_message(msg)
-                is_pass = False
-                print(msg)
-        
-    return is_pass
 
 def main(args: Namespace):
     client = SlackReporter(
         token=args.token,
         channel=args.channel,
-        prefix='ci-pylint-test',
+        prefix='ci-eslint-test',
         repository=args.repo_name,
         branch=args.branch_name,
         target=args.base_name,
         pr_number=args.pull_request_number,
-        tag='CI_PYLINT_TEST'
+        tag='CI_ESLINT_TEST'
     )
+
+    is_installed = False
+    for file in args.modified_files:
+        if is_node_file(file):
+            os.system(f'npm install')
+            is_installed = True
+            break
     
-    if check_pylinter(client, args.modified_files, args.min_score) is True:
-        sys.exit(0)
-    else:
+    is_pass = True
+    if is_installed:
+        test_result = subprocess.check_output(['npm', 'run', 'test'], shell=True).decode().split('\n')
+        for line in test_result:
+            if 'error' in line:
+                is_pass = False
+                break
+        
+    if not is_pass:
+        client.send_slack_message(test_result)
         sys.exit(1)
+    else:
+        sys.exit(0)
+    
+                
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

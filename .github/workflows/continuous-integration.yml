@@ -41,19 +41,9 @@ jobs:
           repository: teamdable/vv-continuous-integration
           path: action/
       
-      - name: Setup Python Environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-      
       - name: 변경된 파일 체크
         id: changed-files
         uses: tj-actions/changed-files@v18.7
-      
-      - name: 변경된 파일 타입 체크
-        if: steps.changed-files.outputs.all_changed_files
-        id: check-modified-files
-        run: ./action/check-modified-files --modified-files ${{ steps.changed-files.outputs.all_changed_files }}
       
       - name: Install packages for report
         if: steps.changed-files.outputs.all_changed_files
@@ -75,7 +65,7 @@ jobs:
             --pull-request-number ${{ github.event.number }}
       
       - name: Pylint Test
-        if: steps.check-modified-files.any-python-files
+        if: steps.changed-files.outputs.all_changed_files
         run: |
           ./action/pylint-test \
             --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
@@ -88,14 +78,16 @@ jobs:
             --base-sha ${{ github.event.pull_request.base.sha }} \
             --pull-request-number ${{ github.event.number }}
       
-      - name: npm install
-        if: steps.check-modified-files.any-js-files
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-      
-      - name: eslint test
-        if: steps.check-modified-files.any-js-files
+      - name: Eslint test
+        if: steps.changed-files.outputs.all_changed_files
         run: |
-          npm install
-          npm run test
+          ./action/eslint-test \
+            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
+            --min-score 8.0 \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
