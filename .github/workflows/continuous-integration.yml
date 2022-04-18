@@ -43,9 +43,9 @@ jobs:
         uses: tj-actions/changed-files@v18.7
         with:
           files: |
-            **/*.js
+            **.js
           files_ignore: |
-            **/*.yml
+            **.yml
       
       - name: Setup Python Environment
         if: steps.changed-files.outputs.all_changed_files
