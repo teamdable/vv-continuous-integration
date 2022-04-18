@@ -25,7 +25,7 @@ def main(args: Namespace):
     is_installed = False
     for file in args.modified_files:
         if is_node_file(file):
-            os.system(f'sudo npm install')
+            os.system(f'NODE_ENV=development npm install')
             is_installed = True
             break
     
@@ -41,7 +41,6 @@ def main(args: Namespace):
         client.send_slack_message(test_result)
         sys.exit(1)
     else:
-        client.send_slack_message(test_result)
         sys.exit(0)
     
                 
