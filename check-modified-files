@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import argparse
 import subprocess
 
@@ -15,14 +16,14 @@ def main(modified_files: list):
             any_js_files = True
     
     if any_python_files:
-        subprocess.check_call('echo "::set-output name=any-python-files::true"', shell=True)
+        os.system('echo "::set-output name=any-python-files::true"')
     else:
-        subprocess.check_call('echo "::set-output name=any-python-files::false"', shell=True)
+        os.system('echo "::set-output name=any-python-files::false"')
     
     if any_js_files:
-        subprocess.check_call('echo "::set-output name=any-js-files::true"', shell=True)
+        os.system('echo "::set-output name=any-js-files::true"')
     else:
-        subprocess.check_call('echo "::set-output name=any-js-files::false"', shell=True)
+        os.system('echo "::set-output name=any-js-files::false"')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
