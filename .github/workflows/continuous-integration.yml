@@ -27,6 +27,10 @@ jobs:
     runs-on: ubuntu-20.04
     name: version check and linter
 
+    outputs:
+      any-python-files: ${{ steps.check-modified-files.any-python-files }}
+      any-js-files: ${{ steps.check-modified-files.any-js-files }}
+
     steps:
       - name: Checkout the CI-target repository
         uses: actions/checkout@v3
