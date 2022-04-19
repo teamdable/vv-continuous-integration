@@ -95,56 +95,56 @@ jobs:
             --pull-request-number ${{ github.event.number }}
 
     
-    run-test-code-using-gpu:
-      if: ${{ inputs.use-gpu }} == true
-      needs: check-version-and-linter
-      runs-on: self-hosted
-      name: run test code on self hosted runner
+  run-test-code-using-gpu:
+    if: ${{ inputs.use-gpu }} == true
+    needs: check-version-and-linter
+    runs-on: self-hosted
+    name: run test code on self hosted runner
 
-      steps:
-        - name: Checkout the CI-target repository
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout the CI-target repository
+        uses: actions/checkout@v3
 
-        - name: Checkout the action repository
-          uses: actions/checkout@v3
-          with:
-            repository: teamdable/vv-continuous-integration
-            path: action/
-        
-        - name: Run Test Codes
-          run: |
-            ./run-test \
-              --token ${{ secrets.slack-token }} \
-              --channel ${{ inputs.slack-channel }} \
-              --repo-name ${{ github.event.repository.name }} \
-              --branch-name ${{ github.event.pull_request.head.ref }} \
-              --base-name ${{ github.event.pull_request.base.ref }} \
-              --base-sha ${{ github.event.pull_request.base.sha }} \
-              --pull-request-number ${{ github.event.number }}
-    
-    run-test-code-using-cpu:
-      if: ${{ inputs.use-gpu }} == false
-      needs: check-version-and-linter
-      runs-on: ubuntu-20.04
-      name: run test code on github actions runner
+      - name: Checkout the action repository
+        uses: actions/checkout@v3
+        with:
+          repository: teamdable/vv-continuous-integration
+          path: action/
+      
+      - name: Run Test Codes
+        run: |
+          ./run-test \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
+  
+  run-test-code-using-cpu:
+    if: ${{ inputs.use-gpu }} == false
+    needs: check-version-and-linter
+    runs-on: ubuntu-20.04
+    name: run test code on github actions runner
 
-      steps:
-        - name: Checkout the CI-target repository
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout the CI-target repository
+        uses: actions/checkout@v3
 
-        - name: Checkout the action repository
-          uses: actions/checkout@v3
-          with:
-            repository: teamdable/vv-continuous-integration
-            path: action/
+      - name: Checkout the action repository
+        uses: actions/checkout@v3
+        with:
+          repository: teamdable/vv-continuous-integration
+          path: action/
 
-        - name: Run Test Codes
-          run: |
-            ./run-test \
-              --token ${{ secrets.slack-token }} \
-              --channel ${{ inputs.slack-channel }} \
-              --repo-name ${{ github.event.repository.name }} \
-              --branch-name ${{ github.event.pull_request.head.ref }} \
-              --base-name ${{ github.event.pull_request.base.ref }} \
-              --base-sha ${{ github.event.pull_request.base.sha }} \
-              --pull-request-number ${{ github.event.number }}
+      - name: Run Test Codes
+        run: |
+          ./run-test \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
