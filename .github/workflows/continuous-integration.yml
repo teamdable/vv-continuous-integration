@@ -7,6 +7,12 @@ on:
         description: slack channel for send message
         required: true
         type: string
+      
+      use-gpu:
+        description: run test on gpu
+        type: boolean
+        required: false
+        default: false
 
     secrets:
       extra-index-url:
@@ -23,13 +29,9 @@ on:
 
 
 jobs:
-  continuous-integration:
+  check-version-and-linter:
     runs-on: ubuntu-20.04
     name: version check and linter
-
-    outputs:
-      any-python-files: ${{ steps.check-modified-files.any-python-files }}
-      any-js-files: ${{ steps.check-modified-files.any-js-files }}
 
     steps:
       - name: Checkout the CI-target repository
@@ -84,6 +86,71 @@ jobs:
           ./action/eslint-test \
             --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
             --min-score 8.0 \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
+
+    
+  on-self-hosted-runner:
+    if: ${{ inputs.use-gpu }}
+    needs: check-version-and-linter
+    runs-on: self-hosted
+    name: run test code on self hosted runner
+
+    steps:
+      - name: Checkout the CI-target repository
+        uses: actions/checkout@v3
+
+      - name: Checkout the action repository
+        uses: actions/checkout@v3
+        with:
+          repository: teamdable/vv-continuous-integration
+          path: action/
+
+      - name: Install packages for report
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r action/requirements.txt
+      
+      - name: Run Test Codes
+        run: |
+          ./action/run-test \
+            --token ${{ secrets.slack-token }} \
+            --channel ${{ inputs.slack-channel }} \
+            --repo-name ${{ github.event.repository.name }} \
+            --branch-name ${{ github.event.pull_request.head.ref }} \
+            --base-name ${{ github.event.pull_request.base.ref }} \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --pull-request-number ${{ github.event.number }}
+  
+  on-github-actions-runner:
+    if: ${{ ! inputs.use-gpu }}
+    needs: check-version-and-linter
+    runs-on: ubuntu-20.04
+    name: run test code on github actions runner
+
+    steps:
+      - name: Checkout the CI-target repository
+        uses: actions/checkout@v3
+
+      - name: Checkout the action repository
+        uses: actions/checkout@v3
+        with:
+          repository: teamdable/vv-continuous-integration
+          path: action/
+      
+      - name: Install packages for report
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
+
+      - name: Run Test Codes
+        run: |
+          ./action/run-test \
             --token ${{ secrets.slack-token }} \
             --channel ${{ inputs.slack-channel }} \
             --repo-name ${{ github.event.repository.name }} \

@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import argparse
+import subprocess
+from argparse import Namespace
+from typing import List
+
+from utils.slack import SlackReporter
+
+def get_all_test_codes() -> List[str]:
+    
+    test_code_set = set()
+    
+    test_dir = 'tests'
+    if os.path.exists(test_dir):
+        for file_name in os.listdir(test_dir):
+            if file_name.endswith('.py') or file_name.endswith('.sh'):
+                test_code_set.add(os.path.join(test_dir, file_name))
+    
+    return list(test_code_set)
+
+def run_test_code(client: SlackReporter, test_code:List[str]) -> int:
+    
+    error_msg = ''
+    return_code = 0
+    for file in test_code:
+        # python files
+        if file.endswith('.py'):
+            output = subprocess.run(['python', file], capture_output=True)
+            if output.returncode != 0:
+                return_code = 1
+                error_msg += f'{file} failed\n'
+                error_msg += output.stdout.decode()
+
+        # bash files
+        elif file.endswith('.sh'):
+            output = subprocess.run(['bash', file], capture_output=True)
+            if output.returncode != 0:
+                return_code = 1
+                error_msg += f'{file} failed\n'
+                error_msg += output.stdout.decode()
+        
+        # other files
+        # else:
+    
+    if return_code != 0:
+        client.send_slack_message(error_msg)
+    
+    return return_code
+
+def main(args: Namespace):
+    client = SlackReporter(
+        token=args.token,
+        channel=args.channel,
+        prefix='ci-test-codes',
+        repository=args.repo_name,
+        branch=args.branch_name,
+        target=args.base_name,
+        pr_number=args.pull_request_number,
+        tag='CI_TEST_CODES'
+    )
+
+    test_code = get_all_test_codes()
+    if len(test_code) == 0:
+        sys.exit(run_test_code(client, test_code))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--token', type=str, default='', help='slack token')
+    parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
+    parser.add_argument('--repo-name', type=str, default='', help='repository name')
+    parser.add_argument('--branch-name', type=str, default='', help='branch name')
+    parser.add_argument('--base-name', type=str, default='', help='base branch name')
+    parser.add_argument('--base-sha', type=str, default='', help='base branch sha')
+    parser.add_argument('--pull-request-number', type=str, default='', help='pull request number')
+
+    args = parser.parse_args()
+    main(args)
