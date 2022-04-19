@@ -11,7 +11,7 @@ on:
       use-gpu:
         description: run test on gpu
         required: false
-        type: bool
+        type: boolean
         default: false
 
     secrets:
