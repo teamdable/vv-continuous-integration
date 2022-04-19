@@ -64,7 +64,7 @@ def main(args: Namespace):
 
     test_code = get_all_test_codes()
     if len(test_code) == 0:
-        sys.exit(run_test_code(test_code))
+        sys.exit(run_test_code(client, test_code))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
