@@ -1,7 +1,4 @@
 # vv-continuous-integration
-vv-team github actions를 이용한 CI를 위한 레포지토리이다.
-
-## Contents
 
 - [Continuous Integration](#continuous-integration): workflow yml 파일
 
@@ -10,7 +7,6 @@ vv-team github actions를 이용한 CI를 위한 레포지토리이다.
 - [Branch Protect Rule](#branch-protect-rule): ci 결과로 보호할 branch
 
 - [test-codes](#test-codes): ci시 실행할 test codes를 추가하는 방법
-
 
 
 ## continuous-integration
