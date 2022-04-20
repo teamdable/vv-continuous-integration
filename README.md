@@ -12,7 +12,7 @@
 ## continuous-integration
 - 각 레포의 .github/workflows/${CI-yml-file}을 생성한다.
 ```yaml
-name: VERSION-CHECK
+name: continuous-integration
 on:
   pull_request:
     branches:
@@ -20,7 +20,7 @@ on:
       - develop
 
 jobs:
-  version-check:
+  continuous-integration:
     uses: teamdable/vv-continuous-integration/.github/workflows/continuous-integration.yml@main
     with:
       slack-channel: 테스트 중 이상이 발생했을 때 전송될 슬랙 채널
