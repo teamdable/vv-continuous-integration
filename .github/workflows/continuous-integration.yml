@@ -115,6 +115,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r action/requirements.txt
+
+      - name: Build Test Environment
+        run: |
+          ./builder \
+            --trusted-host ${{ secrets.trusted-host }}
+            --extra-index-url ${{ secrets.extra-index-url }}
       
       - name: Run Test Codes
         run: |
@@ -147,6 +153,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
+      
+      - name: Build Test Environment
+        run: |
+          ./builder \
+            --trusted-host ${{ secrets.trusted-host }}
+            --extra-index-url ${{ secrets.extra-index-url }}
 
       - name: Run Test Codes
         run: |
