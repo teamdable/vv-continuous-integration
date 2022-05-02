@@ -118,8 +118,8 @@ jobs:
 
       - name: Build Test Environment
         run: |
-          ./builder \
-            --trusted-host ${{ secrets.trusted-host }}
+          ./action/builder \
+            --trusted-host ${{ secrets.trusted-host }} \
             --extra-index-url ${{ secrets.extra-index-url }}
       
       - name: Run Test Codes
