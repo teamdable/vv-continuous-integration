@@ -19,7 +19,7 @@ class VersionTarget:
                     elif line.startswith('-'):
                         self.prev_version = self.get_version(line)
         
-        if self.prev_version is None or self.next_version is None:
+        if self.prev_version is None and self.next_version is None:
             return False
         else:
             return True
