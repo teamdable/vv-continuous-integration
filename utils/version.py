@@ -21,6 +21,9 @@ class VersionTarget:
         
         if self.prev_version is None and self.next_version is None:
             return False
+        elif self.prev_version is None and self.next_version is not None:
+            self.prev_version = '0.0.0'
+            return True
         else:
             return True
 
