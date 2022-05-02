@@ -19,24 +19,33 @@ class VersionTarget:
                     elif line.startswith('-'):
                         self.prev_version = self.get_version(line)
         
-        if self.prev_version is None or self.next_version is None:
+        if self.prev_version is None and self.next_version is None:
             return False
+        elif self.prev_version is None and self.next_version is not None:
+            self.prev_version = '0.0.0'
+            return True
         else:
             return True
 
     def check_version_update(self):
-        if 'a' in self.prev_version and 'a' in self.next_version:
-            if int(self.prev_version.split('a')[1]) + 1 == int(self.next_version.split('a')[1]):
+        prev_major, prev_minor, prev_build = self.prev_version.split('.')
+        next_major, next_minor, next_build = self.next_version.split('.')
+        if int(prev_major) + 1 == int(next_major):
+            return True
+        elif int(prev_major) == int(next_major) and int(prev_minor) + 1 == int(next_minor):
+            return True
+        elif 'a' in prev_build and 'a' in next_build:
+            if int(prev_build.split('a')[1]) + 1 == int(next_build.split('a')[1]):
                 return True
             else:
                 return False
-        elif 'b' in self.prev_version and 'b' in self.next_version:
-            if int(self.prev_version.split('b')[1]) + 1 == int(self.next_version.split('b')[1]):
+        elif 'b' in prev_build and 'b' in next_build:
+            if int(prev_build.split('b')[1]) + 1 == int(next_build.split('b')[1]):
                 return True
             else:
                 return False
-        elif 'rc' in self.prev_version and 'rc' in self.next_version:
-            if int(self.prev_version.split('rc')[1]) + 1 == int(self.next_version.split('rc')[1]):
+        elif 'rc' in prev_build and 'rc' in next_build:
+            if int(prev_build.split('rc')[1]) + 1 == int(next_build.split('rc')[1]):
                 return True
             else:
                 return False
