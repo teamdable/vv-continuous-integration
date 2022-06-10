@@ -1,3 +1,6 @@
+from tabnanny import check
+
+
 class VersionTarget:
     def __init__(self, diff_file:str):
         self.prev_version = None
@@ -49,14 +52,22 @@ class VersionTarget:
                 return True
             else:
                 return False
-        else:
-            try:
-                if int(self.prev_version.split('.')[-1]) + 1 == int(self.next_version.split('.')[-1]):
+        elif is_int(next_build):
+            if is_int(prev_build):
+                if int(prev_build) + 1 == int(next_build):
                     return True
-                else:
-                    return False
-            except:
-                if self.prev_version < self.next_version:
-                    return True
-                else:
-                    return False
+            else:
+                return True
+        
+        elif next_build > prev_build:
+            return True
+        
+        return False
+    
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
