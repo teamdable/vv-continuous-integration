@@ -13,6 +13,8 @@ def check_pylinter(client: SlackReporter, modified_files: list, min_score: float
     for file in modified_files:
         if os.path.basename(file) == '__init__.py':
             continue
+        if os.path.dirname(file) == 'tests':
+            continue
         if is_python_file(file):
             score, output = get_pylint_score(file)
             if score < min_score:
