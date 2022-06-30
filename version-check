@@ -44,7 +44,8 @@ def main(args: Namespace):
     )
 
     version_update = False
-    for file in args.modified_files:
+    difference_files = 'git diff --name-only ' + args.base_name
+    for file in os.popen(difference_files).read().split('\n'):
         if os.path.basename(file) in {'.version', '_version.py', 'package.json'}:
             version_update = check_version(client, file, args.base_sha)
             break
@@ -60,7 +61,6 @@ def main(args: Namespace):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--modified-files', type=str, default=[], nargs='+', help='modified files')
     parser.add_argument('-t', '--token', type=str, default='', help='slack token')
     parser.add_argument('-c', '--channel', type=str, default='', help='slack channel')
     parser.add_argument('--repo-name', type=str, default='', help='repository name')
