@@ -58,10 +58,8 @@ jobs:
           pip install -r action/requirements.txt --trusted-host ${{ secrets.trusted-host }} --extra-index-url ${{ secrets.extra-index-url }}
 
       - name: Version 파일이 변경되었는 지 체크
-        if: steps.changed-files.outputs.all_changed_files
         run: |
           ./action/version-check \
-            --modified-files ${{ steps.changed-files.outputs.all_changed_files }} \
             --token ${{ secrets.slack-token }} \
             --channel ${{ inputs.slack-channel }} \
             --repo-name ${{ github.event.repository.name }} \
